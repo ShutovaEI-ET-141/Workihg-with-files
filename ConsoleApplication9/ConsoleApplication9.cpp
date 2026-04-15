@@ -1,4 +1,5 @@
-﻿//Вариант 24.
+// Практика 9
+//Вариант 24
 //Определить структурный тип, описывающий расписание полетов самолетов(пункт
 //посадки, время отправления, время прибытия, время полета, стоимость билета, тип
 //рейса : чартер, транзит, стыковка).Заполнить структурный массив 20 - ю записями.
@@ -219,5 +220,95 @@ int main() {
     int loadedCount = loadFromBinary("flights.dat", loadedFlights, SIZE);
     printf("Загружено из файла %d записей\n", loadedCount);
     delete[] flights;
+    return 0;
+}
+
+// Практика 10
+#include <iostream>
+#include <fstream>
+#include <cstring>
+using namespace std;
+const int MAX_NAME = 80;
+struct Person {
+    char name[MAX_NAME];
+    int pol;
+    int age;
+};
+const int N = 5;
+// ЗАДАНИЕ 1
+void updateFromTextFile(Person* people, int size, const char* filename) {
+    ifstream fin;
+    fin.open(filename);
+    if (!fin.is_open()) {
+        cerr << "Ошибка открытия файла " << filename << endl;
+        return;
+    }
+    char fam[MAX_NAME];
+    int polFromFile;
+    while (!fin.eof()) {
+        fin >> fam >> polFromFile;
+        if (fin.eof()) break;
+        for (int i = 0; i < size; i++) {
+            if (strcmp(people[i].name, fam) == 0) {
+                people[i].pol = polFromFile;
+                break;
+            }
+        }
+    }
+    fin.close();
+}
+//ЗАДАНИЕ 2
+void writeBinary(const char* filename, Person* people, int size) {
+    ofstream fout;
+    fout.open(filename, ios::binary | ios::out);
+    
+    if (!fout.is_open()) {
+        cerr << "Ошибка записи в бинарный файл" << endl;
+        return;
+    }
+    
+    fout.write((char*)people, sizeof(Person) * size);
+    fout.close();
+}
+void readBinary(const char* filename, Person* people, int size) {
+    ifstream fin;
+    fin.open(filename, ios::binary | ios::in);
+    
+    if (!fin.is_open()) {
+        cerr << "Ошибка чтения бинарного файла" << endl;
+        return;
+    }
+    
+    fin.read((char*)people, sizeof(Person) * size);
+    fin.close();
+}
+void printPeople(Person* people, int size) {
+    for (int i = 0; i < size; i++) {
+        cout << people[i].name << " | пол: " << people[i].pol 
+             << " | возраст: " << people[i].age << endl;
+    }
+}
+int main() {
+    setlocale(LC_ALL, "Russian");
+    Person people[N] = {
+        {"Ivanov", -1, 25},
+        {"Petrov", -1, 30},
+        {"Sidorova", -1, 22},
+        {"Ivanova", -1, 28},
+        {"Makarkin", -1, 35}
+    };
+    cout << "=== До обновления из текстового файла ===" << endl;
+    printPeople(people, N);
+    // ЗАДАНИЕ 1
+    updateFromTextFile(people, N, "data.txt");
+    cout << "\n=== После обновления из текстового файла ===" << endl;
+    printPeople(people, N);
+    // ЗАДАНИЕ 2
+    writeBinary("people.bin", people, N);
+    Person newPeople[N];
+    memset(newPeople, 0, sizeof(newPeople));
+    readBinary("people.bin", newPeople, N);
+    cout << "\n=== После чтения из бинарного файла ===" << endl;
+    printPeople(newPeople, N);
     return 0;
 }
